@@ -1,0 +1,17 @@
+{
+  "name": "sentinel-agent-test",
+  "version": "1.0.0",
+  "description": "Sample project for testing PR review agent",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["sample", "testing"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
