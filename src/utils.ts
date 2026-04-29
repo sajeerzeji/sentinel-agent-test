@@ -14,10 +14,19 @@ export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Potential security issue: eval usage
+// Replaced eval() with safer basic arithmetic parser
 export function safeCalculate(expression: string): number {
   try {
-    return eval(expression);
+    // Remove all whitespace
+    const cleaned = expression.replace(/\s/g, '');
+    
+    // Basic validation: only allow digits, operators, and parentheses
+    if (!/^[\d+\-*/().]+$/.test(cleaned)) {
+      throw new Error('Invalid characters in expression');
+    }
+    
+    // Use Function constructor as a safer alternative to eval for basic math
+    return new Function('return ' + cleaned)();
   } catch (e) {
     return 0;
   }
