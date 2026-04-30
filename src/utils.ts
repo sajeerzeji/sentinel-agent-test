@@ -6,8 +6,9 @@ export function formatDate(date: Date): string {
 }
 
 export function validateEmail(email: string): boolean {
-  // Simplified validation - should use regex
-  return email.includes('@') && email.includes('.');
+  // Improved email validation using regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
 
 export function capitalize(str: string): string {
