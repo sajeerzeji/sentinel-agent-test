@@ -6,6 +6,12 @@ export function formatDate(date: Date): string {
   return date.toISOString();
 }
 
+/**
+ * Validates email addresses using RFC 5322 compliant validation via validator.js.
+ * This provides robust validation that handles edge cases and internationalized email addresses.
+ * @param email - The email address to validate
+ * @returns true if the email is valid, false otherwise
+ */
 export function validateEmail(email: string): boolean {
   // Use validator.js for RFC 5322 compliant email validation
   return validator.isEmail(email);
