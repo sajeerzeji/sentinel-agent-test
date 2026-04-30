@@ -1,4 +1,5 @@
 // Utility functions with various code quality issues
+import { Parser } from 'expr-eval';
 
 export function formatDate(date: Date): string {
   return date.toISOString();
@@ -14,19 +15,11 @@ export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Replaced eval() with safer basic arithmetic parser
+// Safe expression evaluation using expr-eval library
 export function safeCalculate(expression: string): number {
   try {
-    // Remove all whitespace
-    const cleaned = expression.replace(/\s/g, '');
-    
-    // Basic validation: only allow digits, operators, and parentheses
-    if (!/^[\d+\-*/().]+$/.test(cleaned)) {
-      throw new Error('Invalid characters in expression');
-    }
-    
-    // Use Function constructor as a safer alternative to eval for basic math
-    return new Function('return ' + cleaned)();
+    const parser = new Parser();
+    return parser.evaluate(expression);
   } catch (e) {
     return 0;
   }
