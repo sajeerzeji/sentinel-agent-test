@@ -1,14 +1,14 @@
 // Utility functions with various code quality issues
 import { Parser } from 'expr-eval';
+import validator from 'validator';
 
 export function formatDate(date: Date): string {
   return date.toISOString();
 }
 
 export function validateEmail(email: string): boolean {
-  // Improved email validation using regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  // Use validator.js for RFC 5322 compliant email validation
+  return validator.isEmail(email);
 }
 
 export function capitalize(str: string): string {
