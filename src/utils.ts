@@ -1,4 +1,5 @@
 // Utility functions with various code quality issues
+import { Parser } from 'expr-eval';
 
 export function formatDate(date: Date): string {
   return date.toISOString();
@@ -14,10 +15,11 @@ export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Potential security issue: eval usage
+// Safe expression evaluation using expr-eval library
 export function safeCalculate(expression: string): number {
   try {
-    return eval(expression);
+    const parser = new Parser();
+    return parser.evaluate(expression);
   } catch (e) {
     return 0;
   }
