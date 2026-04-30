@@ -19,7 +19,7 @@ export function formatDate(date: Date): string {
  */
 export function validateEmail(email: string): boolean {
   // Use validator.js for RFC 5322 compliant email validation
-  return validator.isEmail(email);
+  return validator.isEmail(email.trim());
 }
 
 /**

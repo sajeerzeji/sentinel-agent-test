@@ -7,6 +7,8 @@ describe('Utils', () => {
       expect(validateEmail('test@example.com')).toBe(true);
       expect(validateEmail('user.name@example.com')).toBe(true);
       expect(validateEmail('user+tag@example.co.uk')).toBe(true);
+      // Leading/trailing whitespace should not affect validity
+      expect(validateEmail('  test@example.com  ')).toBe(true);
     });
 
     it('should reject invalid email addresses', () => {
