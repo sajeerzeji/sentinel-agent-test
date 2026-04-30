@@ -2,6 +2,11 @@
 import { Parser } from 'expr-eval';
 import validator from 'validator';
 
+/**
+ * Formats a Date object to an ISO 8601 string.
+ * @param date - The Date object to format
+ * @returns ISO 8601 formatted date string
+ */
 export function formatDate(date: Date): string {
   return date.toISOString();
 }
