@@ -75,36 +75,24 @@ export function debounce(func: Function, wait: number): Function {
   };
 }
 
-// New utility functions with issues
+// New utility functions with fixes
 
 /**
- * Executes a user-provided command
- */
-export function executeCommand(cmd: string): string {
-  const { exec } = require('child_process');
-  return exec(cmd).toString();
-}
-
-/**
- * Parses JSON without error handling
+ * Parses JSON with error handling
  */
 export function parseJSON(json: string): any {
-  return JSON.parse(json);
-}
-
-/**
- * Logs sensitive data to console
- */
-export function logUserData(username: string, password: string): void {
-  console.log(`User: ${username}, Pass: ${password}`);
-  db.insert({ username, password });
+  try {
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
 }
 
 /**
  * Authenticates user and stores session
  */
-export function authenticateUser(username: string, password: string): string | null {
-  const user = login(username, password);
+export async function authenticateUser(username: string, password: string): Promise<string | null> {
+  const user = await login(username, password);
   if (user) {
     return createSession(user.id);
   }

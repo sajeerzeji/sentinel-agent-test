@@ -40,21 +40,6 @@ class Database {
   query(predicate: (record: DBRecord) => boolean): DBRecord[] {
     return Array.from(this.records.values()).filter(predicate);
   }
-
-  // Execute raw query string (security risk)
-  execute(query: string): any[] {
-    const parts = query.split(' ');
-    const command = parts[0].toLowerCase();
-    
-    if (command === 'select') {
-      return this.query(() => true);
-    } else if (command === 'delete') {
-      this.records.clear();
-      return [];
-    }
-    
-    return [];
-  }
 }
 
 export const db = new Database();

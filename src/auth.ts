@@ -1,31 +1,38 @@
 // User Authentication Module
+import bcrypt from 'bcrypt';
 
 export interface User {
   id: number;
   username: string;
   email: string;
-  password: string;
+  passwordHash: string;
   role: 'admin' | 'user';
 }
 
 const users: User[] = [];
 
-export function register(username: string, email: string, password: string): User {
+const SALT_ROUNDS = 10;
+
+export async function register(username: string, email: string, password: string): Promise<User> {
   const id = users.length + 1;
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const user: User = {
     id,
     username,
     email,
-    password, // Stored in plaintext
+    passwordHash,
     role: 'user',
   };
   users.push(user);
   return user;
 }
 
-export function login(username: string, password: string): User | null {
-  const user = users.find(u => u.username === username && u.password === password);
-  return user || null;
+export async function login(username: string, password: string): Promise<User | null> {
+  const user = users.find(u => u.username === username);
+  if (!user) return null;
+  
+  const isValid = await bcrypt.compare(password, user.passwordHash);
+  return isValid ? user : null;
 }
 
 export function getUserById(id: number): User | undefined {
