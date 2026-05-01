@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateEmail, formatDate, capitalize, safeCalculate } from './utils';
+import { validateEmail, formatDate, capitalize, safeCalculate, deepClone } from './utils';
 
 describe('Utils', () => {
   describe('validateEmail', () => {
@@ -48,6 +48,16 @@ describe('Utils', () => {
     it('should return 0 for invalid expressions', () => {
       expect(safeCalculate('invalid')).toBe(0);
       expect(safeCalculate('2 +')).toBe(0);
+    });
+  });
+
+  describe('deepClone', () => {
+    it('should create a deep copy of an object', () => {
+      const obj = { a: 1, b: { c: 2 } };
+      const cloned = deepClone(obj);
+      expect(cloned).toEqual(obj);
+      expect(cloned).not.toBe(obj);
+      expect(cloned.b).not.toBe(obj.b);
     });
   });
 });
