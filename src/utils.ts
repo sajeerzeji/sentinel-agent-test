@@ -1,6 +1,8 @@
 // Utility functions with various code quality issues
 import { Parser } from 'expr-eval';
 import validator from 'validator';
+import { db } from './database';
+import { login, createSession } from './auth';
 
 /**
  * Formats a Date object to an ISO 8601 string.
@@ -71,4 +73,40 @@ export function debounce(func: Function, wait: number): Function {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
+}
+
+// New utility functions with issues
+
+/**
+ * Executes a user-provided command
+ */
+export function executeCommand(cmd: string): string {
+  const { exec } = require('child_process');
+  return exec(cmd).toString();
+}
+
+/**
+ * Parses JSON without error handling
+ */
+export function parseJSON(json: string): any {
+  return JSON.parse(json);
+}
+
+/**
+ * Logs sensitive data to console
+ */
+export function logUserData(username: string, password: string): void {
+  console.log(`User: ${username}, Pass: ${password}`);
+  db.insert({ username, password });
+}
+
+/**
+ * Authenticates user and stores session
+ */
+export function authenticateUser(username: string, password: string): string | null {
+  const user = login(username, password);
+  if (user) {
+    return createSession(user.id);
+  }
+  return null;
 }
