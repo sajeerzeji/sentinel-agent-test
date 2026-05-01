@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateEmail, formatDate, capitalize } from './utils';
+import { validateEmail, formatDate, capitalize, safeCalculate } from './utils';
 
 describe('Utils', () => {
   describe('validateEmail', () => {
@@ -35,6 +35,19 @@ describe('Utils', () => {
 
     it('should handle empty string', () => {
       expect(capitalize('')).toBe('');
+    });
+  });
+
+  describe('safeCalculate', () => {
+    it('should evaluate valid mathematical expressions', () => {
+      expect(safeCalculate('2 + 2')).toBe(4);
+      expect(safeCalculate('10 * 5')).toBe(50);
+      expect(safeCalculate('20 / 4')).toBe(5);
+    });
+
+    it('should return 0 for invalid expressions', () => {
+      expect(safeCalculate('invalid')).toBe(0);
+      expect(safeCalculate('2 +')).toBe(0);
     });
   });
 });
