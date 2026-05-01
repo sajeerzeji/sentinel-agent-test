@@ -33,6 +33,12 @@ export function capitalize(str: string): string {
 }
 
 // Safe expression evaluation using expr-eval library
+/**
+ * Safely evaluates a mathematical expression using the expr-eval library.
+ * Returns 0 if the expression is invalid or evaluation fails.
+ * @param expression - The mathematical expression to evaluate
+ * @returns The result of the evaluation, or 0 on error
+ */
 export function safeCalculate(expression: string): number {
   try {
     const parser = new Parser();
