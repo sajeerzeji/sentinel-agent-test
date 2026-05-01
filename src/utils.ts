@@ -42,6 +42,12 @@ export function safeCalculate(expression: string): number {
   }
 }
 
+/**
+ * Creates a deep clone of an object using JSON serialization.
+ * Note: This does not handle functions, undefined, or circular references.
+ * @param obj - Object to clone
+ * @returns A deep copy of the object
+ */
 export function deepClone(obj: any): any {
   return JSON.parse(JSON.stringify(obj));
 }
