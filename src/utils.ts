@@ -46,6 +46,13 @@ export function deepClone(obj: any): any {
   return JSON.parse(JSON.stringify(obj));
 }
 
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait` milliseconds
+ * have elapsed since the last time the debounced function was invoked.
+ * @param func - Function to debounce
+ * @param wait - Delay in milliseconds
+ * @returns A debounced wrapper function
+ */
 export function debounce(func: Function, wait: number): Function {
   let timeout: any;
   return function(...args: any[]) {
