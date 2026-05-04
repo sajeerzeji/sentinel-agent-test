@@ -1,6 +1,8 @@
 // Utility functions with various code quality issues
 import { Parser } from 'expr-eval';
 import validator from 'validator';
+import { db } from './database';
+import { login, createSession } from './auth';
 
 /**
  * Formats a Date object to an ISO 8601 string.
@@ -71,4 +73,28 @@ export function debounce(func: Function, wait: number): Function {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
+}
+
+// New utility functions with fixes
+
+/**
+ * Parses JSON with error handling
+ */
+export function parseJSON(json: string): any {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Authenticates user and stores session
+ */
+export async function authenticateUser(username: string, password: string): Promise<string | null> {
+  const user = await login(username, password);
+  if (user) {
+    return createSession(user.id);
+  }
+  return null;
 }
