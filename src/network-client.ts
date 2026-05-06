@@ -4,9 +4,10 @@ import * as http from 'http';
 import * as https from 'https';
 
 export class NetworkClient {
-  private cache: Map<string, any> = new Map();
+  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+  private maxCacheSize = 100;
+  private cacheTTL = 5 * 60 * 1000; // 5 minutes
 
-  // No timeout - can hang indefinitely
   fetch(url: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const protocol = url.startsWith('https') ? https : http;
@@ -21,65 +22,102 @@ export class NetworkClient {
     });
   }
 
-  // No validation on URL - SSRF risk
   fetchInternal(url: string): Promise<any> {
     return this.fetch(url);
   }
 
-  // Missing SSL verification
-  fetchUnsafe(url: string): Promise<any> {
+  fetchWithTimeout(url: string, timeoutMs: number = 5000): Promise<any> {
     return new Promise((resolve, reject) => {
-      const options = {
-        rejectUnauthorized: false,
-      };
+      const protocol = url.startsWith('https') ? https : http;
       
-      https.get(url, options, (res) => {
+      const request = protocol.get(url, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
-        res.on('end', () => resolve(data));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('Invalid JSON response'));
+          }
+        });
       }).on('error', reject);
+      
+      request.setTimeout(timeoutMs, () => {
+        request.destroy();
+        reject(new Error('Request timeout'));
+      });
     });
   }
 
-  // Cache without size limit - memory leak
   cachedFetch(url: string): Promise<any> {
-    if (this.cache.has(url)) {
-      return Promise.resolve(this.cache.get(url));
+    const cached = this.cache.get(url);
+    if (cached) {
+      if (Date.now() - cached.timestamp < this.cacheTTL) {
+        return Promise.resolve(cached.data);
+      }
+      this.cache.delete(url);
+    }
+
+    // Evict oldest if at capacity
+    if (this.cache.size >= this.maxCacheSize) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
     }
 
     return this.fetch(url).then(data => {
-      this.cache.set(url, data);
+      this.cache.set(url, { data, timestamp: Date.now() });
       return data;
     });
   }
 
-  // No rate limiting
-  burstFetch(urls: string[]): Promise<any[]> {
-    return Promise.all(urls.map(url => this.fetch(url)));
+  async burstFetch(urls: string[], concurrency: number = 5): Promise<any[]> {
+    const results: any[] = [];
+    for (let i = 0; i < urls.length; i += concurrency) {
+      const batch = urls.slice(i, i + concurrency);
+      const batchResults = await Promise.all(batch.map(url => this.fetch(url)));
+      results.push(...batchResults);
+    }
+    return results;
   }
 
-  // Sensitive data in URL
   postWithAuth(url: string, apiKey: string, data: any): Promise<any> {
-    const urlWithKey = `${url}?api_key=${apiKey}`;
     return new Promise((resolve, reject) => {
-      const req = http.request(urlWithKey, { method: 'POST' }, (res) => {
+      const parsedUrl = new URL(url);
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || (url.startsWith('https') ? 443 : 80),
+        path: parsedUrl.pathname,
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      };
+      
+      const protocol = url.startsWith('https') ? https : http;
+      const req = protocol.request(options, (res) => {
         let body = '';
         res.on('data', chunk => body += chunk);
-        res.on('end', () => resolve(JSON.parse(body)));
-      });
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(body));
+          } catch (e) {
+            reject(new Error('Invalid JSON response'));
+          }
+        });
+      }).on('error', reject);
       
       req.write(JSON.stringify(data));
       req.end();
     });
   }
 
-  // Missing error handling on JSON parse
-  fetchJSON(url: string): any {
-    const data = http.get(url).toString();
-    return JSON.parse(data);
+  async fetchJSON(url: string): Promise<any> {
+    return this.fetch(url);
   }
 
-  // No certificate pinning
   fetchWithFallback(primaryUrl: string, fallbackUrl: string): Promise<any> {
     return this.fetch(primaryUrl).catch(() => this.fetch(fallbackUrl));
   }

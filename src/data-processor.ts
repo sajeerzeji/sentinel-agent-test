@@ -20,10 +20,12 @@ export class DataProcessor {
     }
 
     this.processing = true;
-    const result = this.data.filter(p => p.value > 0);
-    
-    // Race condition: processing flag never reset
-    return result;
+    try {
+      const result = this.data.filter(p => p.value > 0);
+      return result;
+    } finally {
+      this.processing = false;
+    }
   }
 
   calculateAverage(): number {
@@ -39,7 +41,6 @@ export class DataProcessor {
     return sum / this.data.length;
   }
 
-  // Integer overflow risk
   calculateTotal(): number {
     let total = 0;
     for (const point of this.data) {
@@ -48,39 +49,30 @@ export class DataProcessor {
     return total;
   }
 
-  // Type coercion vulnerability
-  findById(id: any): DataPoint | undefined {
-    return this.data.find(p => p.id == id);
+  findById(id: string): DataPoint | undefined {
+    return this.data.find(p => p.id === id);
   }
 
-  // Missing null check
-  getTimestampById(id: string): number {
+  getTimestampById(id: string): number | null {
     const point = this.data.find(p => p.id === id);
-    return point.timestamp;
+    return point ? point.timestamp : null;
   }
 
-  // Memory leak: never clears processed data
   clearProcessed(): void {
     this.data = this.data.filter(p => p.value > 0);
   }
 
-  // Infinite loop risk
-  waitForData(timeout: number): DataPoint[] {
+  async waitForData(timeout: number): Promise<DataPoint[]> {
     const start = Date.now();
     while (this.data.length === 0) {
       if (Date.now() - start > timeout) {
         return [];
       }
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
     return this.data;
   }
 
-  // Prototype pollution risk
-  mergeData(data: any): void {
-    for (const key in data) {
-      (this as any)[key] = data[key];
-    }
-  }
 }
 
 export const processor = new DataProcessor();
