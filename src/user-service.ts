@@ -2,6 +2,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 
 export interface User {
   id: string;
@@ -23,12 +24,13 @@ export class UserService {
   }
 
   async createUser(email: string, password: string, role: 'admin' | 'user' = 'user'): Promise<User> {
-    const id = Math.random().toString(36).substring(2, 15);
+    const id = randomBytes(16).toString('hex');
+    const hashedPassword = this.hashPassword(password);
 
     const user: User = {
       id,
       email,
-      password,
+      password: hashedPassword,
       role,
       createdAt: new Date()
     };
@@ -54,7 +56,7 @@ export class UserService {
 
   async authenticate(email: string, password: string): Promise<User | null> {
     const user = await this.findByEmail(email);
-    if (user && user.password === password) {
+    if (user && this.verifyPassword(password, user.password)) {
       return user;
     }
     return null;
@@ -118,6 +120,18 @@ export class UserService {
     }
 
     return count;
+  }
+
+  private hashPassword(password: string): string {
+    const salt = randomBytes(16).toString('hex');
+    const hash = scryptSync(password, salt, 64).toString('hex');
+    return `${salt}:${hash}`;
+  }
+
+  private verifyPassword(password: string, storedHash: string): boolean {
+    const [salt, hash] = storedHash.split(':');
+    const computedHash = scryptSync(password, salt, 64).toString('hex');
+    return timingSafeEqual(Buffer.from(hash), Buffer.from(computedHash));
   }
 
   private async persistUser(user: User): Promise<void> {
