@@ -36,3 +36,19 @@ export function debounce(func: Function, wait: number): Function {
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
 }
+
+// Issue: Insecure random token generation
+export function generateToken(): string {
+  return Math.random().toString(36).substring(2);
+}
+
+// Issue: Command injection vulnerability
+export function executeCommand(userInput: string): string {
+  const { execSync } = require('child_process');
+  return execSync(userInput).toString();
+}
+
+// Issue: No rate limiting, potential DoS
+export function processLargeArray(items: any[]): any[] {
+  return items.map(item => JSON.parse(JSON.stringify(item)));
+}

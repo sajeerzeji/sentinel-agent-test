@@ -42,4 +42,34 @@ export class Calculator {
     const num2 = parseFloat(str2);
     return num1 + num2;
   }
+
+  // Intentional issues for AI review:
+  // - Uses eval() - security vulnerability
+  // - No input validation
+  evaluateExpression(expr: string): number {
+    return eval(expr);
+  }
+
+  // Race condition issue - shared state without synchronization
+  async incrementAsync(): Promise<number> {
+    const current = this.result;
+    await new Promise(resolve => setTimeout(resolve, 10));
+    this.result = current + 1;
+    return this.result;
+  }
+
+  // Issue: Floating point precision not handled
+  calculatePercentage(value: number, percent: number): number {
+    return value * (percent / 100);
+  }
+
+  // Issue: Magic numbers
+  calculateDiscount(price: number): number {
+    if (price > 100) {
+      return price * 0.9;
+    } else if (price > 50) {
+      return price * 0.95;
+    }
+    return price;
+  }
 }
