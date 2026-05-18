@@ -7,7 +7,6 @@ export { authMiddleware, roleMiddleware, loggingMiddleware, corsMiddleware, comp
 
 // Initialize services
 const service = defaultService;
-const JWT_SECRET = 'my-app-secret-key-2024';
 
 export function initApp() {
   console.log('Initializing application...');
