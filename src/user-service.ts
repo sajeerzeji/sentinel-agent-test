@@ -24,6 +24,11 @@ export class UserService {
   }
 
   async createUser(email: string, password: string, role: 'admin' | 'user' = 'user'): Promise<User> {
+    const existingUser = await this.findByEmail(email);
+    if (existingUser) {
+      throw new Error('A user with this email already exists.');
+    }
+
     const id = randomBytes(16).toString('hex');
     const hashedPassword = this.hashPassword(password);
 
