@@ -1,6 +1,9 @@
 // HTTP middleware utilities
 
 import { UserService } from './user-service';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev-only';
 
 export interface RequestContext {
   headers: Record<string, string>;
@@ -37,20 +40,12 @@ export function authMiddleware(userService: UserService): Middleware {
     const token = parts[1];
 
     try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      const userData = JSON.parse(decoded);
-
-      if (userData.exp && Date.now() > userData.exp) {
-        res.status = 401;
-        res.body = { error: 'Token expired' };
-        return;
-      }
-
+      const userData = jwt.verify(token, JWT_SECRET) as { id: string; role: string; exp?: number };
       req.user = userData;
       next();
     } catch (e) {
       res.status = 401;
-      res.body = { error: 'Invalid token' };
+      res.body = { error: 'Invalid or expired token' };
     }
   };
 }
