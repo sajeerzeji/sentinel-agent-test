@@ -4,6 +4,8 @@ export { Calculator } from './calculator';
 export { formatDate, validateEmail, capitalize, safeCalculate, deepClone, debounce } from './utils';
 export { UserService, User, defaultService } from './user-service';
 export { authMiddleware, roleMiddleware, loggingMiddleware, corsMiddleware, composeMiddleware } from './middleware';
+export { PaymentService, PaymentRequest, PaymentResponse, defaultPaymentService } from './payment-service';
+export { NotificationService, Notification, defaultNotificationService } from './notification-service';
 
 // Initialize services
 const service = defaultService;
